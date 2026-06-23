@@ -19,6 +19,80 @@ Common questions include:
 
 OpsPulse brings these questions into one action-oriented view.
 
+## OpsPulse AI: Natural Language Analytics Assistant
+
+OpsPulse AI includes a natural language analytics assistant that allows users to ask questions about uploaded operational Excel reports.
+
+Instead of only retrieving similar rows, the assistant converts the user question into a structured query plan and then uses Pandas to execute the actual calculation.
+
+### How It Works
+
+User question
+→ LLM query planner
+→ Structured query plan
+→ Pandas execution
+→ Grounded answer
+→ Source rows displayed for transparency
+
+### Example Questions
+
+The assistant can answer questions such as:
+
+* How many work orders are delayed due to parts?
+* How many work orders are not critical but age is greater than 50?
+* Show the top 10 work orders with the highest parts delay.
+* What is the total estimated cost of high-risk work orders?
+* Which customer has the most delayed work orders?
+* Why is a specific work order marked critical?
+
+### Query Planning
+
+The LLM does not calculate the final answer directly.
+
+Instead, it creates a structured query plan, such as:
+
+```json
+{
+  "task": "aggregation",
+  "operation": "count",
+  "filters": [
+    {
+      "column": "Has Parts Backlog",
+      "operator": "==",
+      "value": true
+    },
+    {
+      "column": "Priority",
+      "operator": "!=",
+      "value": "Critical"
+    }
+  ],
+  "sort_by": "Priority Score",
+  "sort_order": "descending",
+  "limit": 5
+}
+```
+
+Pandas then executes the plan against the uploaded reports.
+
+### Supported Question Types
+
+OpsPulse AI supports multiple analytics question types:
+
+* **Retrieval:** Find relevant work orders or explain why an item needs attention.
+* **Filtering:** Filter work orders by risk, priority, backlog, cost, or age.
+* **Sorting:** Rank work orders by parts delay, age, cost, or priority score.
+* **Aggregation:** Count records, calculate totals, and calculate averages.
+* **Group By:** Break down results by customer, risk level, priority, or service type.
+
+### Why This Matters
+
+This project helped demonstrate that RAG alone is not enough for analytics questions.
+
+For business data, users often ask questions that require structured operations such as filtering, sorting, counting, summing, and grouping.
+
+OpsPulse AI combines natural language understanding with Pandas-based execution so the final answer is calculated from the source data and supported by visible source rows.
+
 ## Solution
 
 The app combines three sample operational reports:
@@ -105,7 +179,9 @@ A higher score means the operation is in a healthier state. A lower score means 
 - Pandas
 - Streamlit
 - OpenPyXL
-- Faker
+- Scikit-learn
+- Google Gemini API
+- python-dotenv
 - Excel
 
 ## Project Structure
@@ -184,24 +260,22 @@ No confidential, customer, company, or real operational data is included.
 
 ![Daily Action Board](screenshots/daily_action_board.png)
 
-### Risk Items
+### Ask OpsPulse AI
 
-![Risk Items](screenshots/risk_items.png)
+![Ask OpsPulse AI](screenshots/ask_opspulse_ai.png)
 
-### Methodology
+### LLM Query Plan
 
-![Methodology](screenshots/methodology.png)
+![LLM Query Plan](screenshots/query_plan.png)
 
 ## Future Improvements
 
-Potential improvements include:
-
-- Add charts for aging and backlog trends
-- Add historical trend tracking
-- Add SLA thresholds by service type
-- Add automated recommendations by risk category
-- Add database storage for manager notes and status updates
+- Add persistent database storage for notes and status updates
 - Add user authentication
+- Add charts for aging and backlog trends
+- Add support for PDF reports
+- Add more advanced query validation
+- Add caching to reduce LLM API calls
 - Deploy as a web app
 
 ## Disclaimer
